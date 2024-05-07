@@ -6,6 +6,8 @@ Efficient: Leverage Next.js API routes for server-side tasks.
 Get started quickly:
 
 Clone the project: git clone https://github.com/your-username/your-project-name.git
+
 Install dependencies: npm install (or yarn)
 Start the development server: npm run dev (or yarn dev)
+
 Visit http://localhost:3000 (or the specified port) in your browser to explore!
