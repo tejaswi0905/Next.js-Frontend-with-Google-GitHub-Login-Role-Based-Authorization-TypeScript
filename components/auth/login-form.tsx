@@ -22,7 +22,7 @@ import { Button } from "../ui/button";
 import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
 
-import { login } from "@/actions/login";
+import { login } from "@/actions/login"; //This is a server action. We are using nextjs server actions not api routes for this project.
 
 export const LoginForm = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -30,7 +30,7 @@ export const LoginForm = () => {
 
   const [isPending, startTransition] = useTransition();
 
-  const { ...form } = useForm<z.infer<typeof LoginSchema>>({
+  const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
