@@ -20,7 +20,6 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { FormError } from "../form-error";
-import { FormSuccess } from "../form-success";
 
 import { login } from "@/actions/login"; //This is a server action. We are using nextjs server actions not api routes for this project.
 
@@ -39,13 +38,13 @@ export const LoginForm = () => {
   });
 
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    setSuccess("");
     setError("");
 
     startTransition(() => {
       login(values).then((data) => {
-        setSuccess(data.success);
-        setError(data.error);
+        if (data) {
+          setError(data.error);
+        }
       });
     });
   };
@@ -100,7 +99,6 @@ export const LoginForm = () => {
             />
           </div>
           <FormError message={error}></FormError>
-          <FormSuccess message={success}></FormSuccess>
           <Button type="submit" className="w-full" disabled={isPending}>
             Login
           </Button>
