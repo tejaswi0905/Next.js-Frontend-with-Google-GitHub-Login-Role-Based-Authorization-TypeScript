@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +23,14 @@ import { Button } from "../ui/button";
 import { FormError } from "../form-error";
 
 import { login } from "@/actions/login"; //This is a server action. We are using nextjs server actions not api routes for this project.
+import { FormSuccess } from "../form-success";
 
 export const LoginForm = () => {
+  const searchParams = useSearchParams();
+  const urlError =
+    searchParams.get("error") === "OAuthAccountNotLinked"
+      ? "Email already in use with different provider"
+      : "";
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
@@ -43,7 +50,8 @@ export const LoginForm = () => {
     startTransition(() => {
       login(values).then((data) => {
         if (data) {
-          setError(data.error);
+          setError(data?.error);
+          setSuccess(data?.success);
         }
       });
     });
@@ -98,7 +106,8 @@ export const LoginForm = () => {
               )}
             />
           </div>
-          <FormError message={error}></FormError>
+          <FormError message={error || urlError}></FormError>
+          <FormSuccess message={success}></FormSuccess>
           <Button type="submit" className="w-full" disabled={isPending}>
             Login
           </Button>
