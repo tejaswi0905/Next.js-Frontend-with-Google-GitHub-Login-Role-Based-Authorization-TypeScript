@@ -26,6 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.provider !== "credentials") {
         return true;
       }
+      user.id = user.id || "";
       const existingUser = await getUserById(user?.id);
       if (!existingUser?.emailVerified) {
         return false;
@@ -42,7 +43,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
+
     async jwt({ token }) {
+      // Todo see if we can directly use the user that we get as arugment insted of fetching the user from db suing token.sub.
       if (!token.sub) {
         return token;
       }

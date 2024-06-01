@@ -3,7 +3,7 @@
  * These routes do not reauire any authentication.
  * @type {string[]}
  */
-export const publicRoutes = ["/"];
+export const publicRoutes = ["/", "/auth/new-verification"];
 
 /**
  * An array of routes that are used for authentication
@@ -18,6 +18,12 @@ export const authRoutes = ["/auth/login", "/auth/register", "/auth/error"];
  * @type {string}
  */
 export const apiAuthPrefix = "/api/auth";
+
+/**
+ * Other general protected routes.
+ * @type {string[]}
+ */
+export const generalProtectedRoutes = ["/dummy"];
 
 /**
  * The default redirect path after logging in

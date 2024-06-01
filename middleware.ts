@@ -1,4 +1,6 @@
 import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import authConfig from "./auth.config";
 import {
@@ -6,6 +8,7 @@ import {
   apiAuthPrefix,
   authRoutes,
   publicRoutes,
+  generalProtectedRoutes,
 } from "@/routes";
 
 const { auth } = NextAuth(authConfig);
@@ -17,6 +20,17 @@ export default auth((req): any => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isGeneralProtectedRoute = generalProtectedRoutes.includes(
+    nextUrl.pathname
+  );
+
+  if (isGeneralProtectedRoute) {
+    console.log("inside dummy");
+    if (!isLoggidIn) {
+      return Response.redirect(new URL("/auth/login", nextUrl));
+    }
+    return null;
+  }
 
   if (isApiAuthRoute) {
     return null;
