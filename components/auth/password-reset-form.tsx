@@ -3,12 +3,11 @@
 import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { LoginSchema } from "@/schemas";
+import { PasswordResetSchema } from "@/schemas";
 import { CardWrapper } from "./card-wrapper";
 import {
   Form,
@@ -23,32 +22,39 @@ import { Button } from "../ui/button";
 import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
 
-import { login } from "@/actions/login"; //This is a server action. We are using nextjs server actions not api routes for this project.
+import { passwordTokenVerificationAndReset } from "@/actions/password-token-verification-reset";
 
-export const LoginForm = () => {
+export const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use with different provider"
-      : "";
+  const token = searchParams.get("token");
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof PasswordResetSchema>>({
+    resolver: zodResolver(PasswordResetSchema),
     defaultValues: {
-      email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof PasswordResetSchema>) => {
+    if (!token) {
+      console.log("I am inside the missing token condition.");
+      setError("missing token");
+      return;
+    }
+    if (values.password !== values.confirmPassword) {
+      setError("Passwords didn't match");
+      return;
+    }
     setError("");
+    setSuccess("");
 
     startTransition(() => {
-      login(values).then((data) => {
+      passwordTokenVerificationAndReset(token, values).then((data) => {
         if (data) {
           setError(data?.error);
           setSuccess(data?.success);
@@ -59,33 +65,13 @@ export const LoginForm = () => {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
-      backButtonLabel="Don't have an account?"
-      backButtonHref="/auth/register"
-      showSocial
+      headerLabel="Forgot your passwrod ?"
+      backButtonLabel="Back to login"
+      backButtonHref="/auth/login"
+      showSocial={false}
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="john.doe@example.com"
-                      type="email"
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  {form.formState.errors.email && <FormMessage />}
-                </FormItem>
-              )}
-            />
-          </div>
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -97,22 +83,39 @@ export const LoginForm = () => {
                     <Input
                       {...field}
                       placeholder="******"
-                      type="Password"
+                      type="password"
                       disabled={isPending}
                     />
                   </FormControl>
-                  <FormMessage />
+                  {form.formState.errors.password && <FormMessage />}
                 </FormItem>
               )}
             />
           </div>
-          <Button size="sm" variant="link" className="px-0">
-            <Link href="/auth/reset">Forgot Password ?</Link>
-          </Button>
-          <FormError message={error || urlError}></FormError>
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="******"
+                      type="password"
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  {form.formState.errors.confirmPassword && <FormMessage />}
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormError message={error}></FormError>
           <FormSuccess message={success}></FormSuccess>
           <Button type="submit" className="w-full" disabled={isPending}>
-            Login
+            Reset Password
           </Button>
         </form>
       </Form>
