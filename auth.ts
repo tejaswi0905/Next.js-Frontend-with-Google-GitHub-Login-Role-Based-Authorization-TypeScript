@@ -5,6 +5,7 @@ import { db } from "./lib/db";
 import authConfig from "./auth.config";
 import { getUserById } from "./data/user";
 import { UserRole } from "@prisma/client";
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmation";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
@@ -13,7 +14,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async linkAccount({ user }) {
-      console.log({ user });
       await db.user.update({
         where: { id: user.id },
         data: { emailVerified: new Date() },
@@ -30,6 +30,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const existingUser = await getUserById(user?.id);
       if (!existingUser?.emailVerified) {
         return false;
+      }
+
+      if (existingUser?.isTowFactorEnabled) {
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
+          existingUser.id
+        );
+        if (!twoFactorConfirmation) {
+          return false;
+        }
+        await db.towFactorConfirmation.delete({
+          where: {
+            id: twoFactorConfirmation.id,
+          },
+        });
       }
 
       return true;

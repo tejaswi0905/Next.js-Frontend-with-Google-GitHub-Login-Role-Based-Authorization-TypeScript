@@ -6,7 +6,7 @@ interface VerificationMailProps {
   label: string;
 }
 
-export default function VerificationMail({
+export default function VerificationMaikForLink({
   link,
   label,
 }: VerificationMailProps) {

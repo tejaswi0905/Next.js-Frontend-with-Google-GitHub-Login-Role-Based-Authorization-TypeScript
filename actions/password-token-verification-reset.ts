@@ -17,14 +17,13 @@ export const passwordTokenVerificationAndReset = async (
     return { error: "Invlid (or) missing token" };
   }
 
-  const validatedFields = PasswordResetSchema.safeParse(values);
-  if (!validatedFields.success) {
-    return { error: "Invalid fields" };
-  }
-
   const hasExpired = new Date(passwordResetToken.expires) < new Date();
   if (hasExpired) {
     return { error: "Token expired" };
+  }
+  const validatedFields = PasswordResetSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
   }
 
   const existingUser = await getUserByEmail(passwordResetToken.email);
